@@ -1,10 +1,7 @@
 package com.cg.shopping.service;
 
 import com.cg.shopping.exception.ResourceExistsException;
-import com.cg.shopping.model.Category;
-import com.cg.shopping.model.Product;
-import com.cg.shopping.model.Role;
-import com.cg.shopping.model.User;
+import com.cg.shopping.model.*;
 import com.cg.shopping.model.dto.req.ProductReqDto;
 import com.cg.shopping.model.dto.req.RegisterReqDto;
 import com.cg.shopping.model.dto.req.UserReqDto;
@@ -17,28 +14,27 @@ import com.cg.shopping.repository.ProductRepository;
 import com.cg.shopping.repository.RoleRepository;
 import com.cg.shopping.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+@Transactional
+public class UserService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
 
-
-//    public List<ProductResDto> getAllUsers(){
-//        List<User> users = userRepository.findAll();
-//        return products.stream().map(Product::toProductResDto).collect(Collectors.toList());
-//    }
-//    public Product getProductById(@PathVariable Long id) {
-//        return productRepository.findById(id).orElse(null);
-//    }
-
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     public RegisterResDto save(RegisterReqDto productReqDto) {
         Role role = roleRepository.findById(2L).get();
 
@@ -47,7 +43,7 @@ public class UserService {
             User user = new User();
             user.setName(productReqDto.getName());
             user.setEmail(productReqDto.getEmail());
-            user.setPassword(productReqDto.getPassword());
+            user.setPassword(passwordEncoder.encode(productReqDto.getPassword()));
             user.addRole(role);
 
             userRepository.save(user);
@@ -88,5 +84,14 @@ public class UserService {
             throw new ResourceExistsException("Username and password not correct");
         }
         return user.toUserResDto();
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findUserByEmail(username);
+        if(user == null){
+            throw new UsernameNotFoundException("could not found user..!!");
+        }
+        return new CustomUserDetails(user);
     }
 }

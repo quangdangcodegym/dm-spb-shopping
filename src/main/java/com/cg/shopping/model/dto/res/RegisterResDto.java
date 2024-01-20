@@ -13,7 +13,6 @@ import java.util.List;
 public class RegisterResDto {
     private Long id;
     private String username;
-    private String password;
 
     private List<RoleResDto> roles = new ArrayList<>();
 

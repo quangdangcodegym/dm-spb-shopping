@@ -43,7 +43,7 @@ public class User {
 
     public RegisterResDto toRegisterResDto(){
         List<RoleResDto> roleResDtos = this.roles.stream().map(role -> role.toRoleResDto()).collect(Collectors.toList());
-        return new RegisterResDto(this.id, this.name, this.password, roleResDtos);
+        return new RegisterResDto(this.id, this.name, roleResDtos);
     }
     public UserResDto toUserResDto(){
         List<RoleResDto> roleResDtos = this.roles.stream().map(role -> role.toRoleResDto()).collect(Collectors.toList());
